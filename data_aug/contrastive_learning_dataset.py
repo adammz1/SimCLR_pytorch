@@ -3,6 +3,7 @@ from data_aug.gaussian_blur import GaussianBlur
 from torchvision import transforms, datasets
 from data_aug.view_generator import ContrastiveLearningViewGenerator
 from exceptions.exceptions import InvalidDatasetSelection
+from datasets import CustomDataset
 
 
 class ContrastiveLearningDataset:
@@ -13,7 +14,9 @@ class ContrastiveLearningDataset:
     def get_simclr_pipeline_transform(size, s=1):
         """Return a set of data augmentation transformations as described in the SimCLR paper."""
         color_jitter = transforms.ColorJitter(0.8 * s, 0.8 * s, 0.8 * s, 0.2 * s)
-        data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=size),
+        data_transforms = transforms.Compose([transforms.RandomResizedCrop(size=size,
+                                                                           scale=(0.08, 1.0),
+                                                                           ratio=(0.75, 1.3333333333333333)),
                                               transforms.RandomHorizontalFlip(),
                                               transforms.RandomApply([color_jitter], p=0.8),
                                               transforms.RandomGrayscale(p=0.2),
@@ -32,7 +35,11 @@ class ContrastiveLearningDataset:
                                                           transform=ContrastiveLearningViewGenerator(
                                                               self.get_simclr_pipeline_transform(96),
                                                               n_views),
-                                                          download=True)}
+                                                          download=True),
+                          'je': lambda: CustomDataset(self.root_folder, transform=ContrastiveLearningViewGenerator(
+                                                              self.get_simclr_pipeline_transform(512),
+                                                              n_views))
+                          }
 
         try:
             dataset_fn = valid_datasets[name]
