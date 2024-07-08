@@ -1,9 +1,10 @@
 from torchvision.transforms import transforms
 from data_aug.gaussian_blur import GaussianBlur
 from torchvision import transforms, datasets
-from data_aug.view_generator import ContrastiveLearningViewGenerator
+from data_aug.view_generator import ContrastiveLearningViewGenerator, ContrastiveLearningViewGeneratorFixedCrop
 from exceptions.exceptions import InvalidDatasetSelection
 from datasets import CustomDataset
+from utils import RandomCropWithCoords
 
 
 class ContrastiveLearningDataset:
@@ -14,7 +15,7 @@ class ContrastiveLearningDataset:
     def get_simclr_pipeline_transform(size, s=1):
         """Return a set of data augmentation transformations as described in the SimCLR paper."""
         color_jitter = transforms.ColorJitter(0.8 * s, 0.8 * s, 0.8 * s, 0.2 * s)
-        data_transforms = transforms.Compose([transforms.RandomCrop(size=size),
+        data_transforms = transforms.Compose([RandomCropWithCoords(size=size),
                                               # transforms.RandomResizedCrop(size=size,
                                               #                              scale=(0.08, 1.0),
                                               #                              ratio=(0.75, 1.3333333333333333)),
@@ -37,7 +38,8 @@ class ContrastiveLearningDataset:
                                                               self.get_simclr_pipeline_transform(96),
                                                               n_views),
                                                           download=True),
-                          'je': lambda: CustomDataset(self.root_folder, transform=ContrastiveLearningViewGenerator(
+                          'je': lambda: CustomDataset(self.root_folder,
+                                                      transform=ContrastiveLearningViewGeneratorFixedCrop(
                                                               self.get_simclr_pipeline_transform(512),
                                                               n_views))
                           }
