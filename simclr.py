@@ -85,10 +85,15 @@ class SimCLR(object):
 
                 if n_iter % self.args.log_every_n_steps == 0:
                     top1, top5 = accuracy(logits, labels, topk=(1, 5))
+                    learning_rate = self.scheduler.get_lr()[0]
                     self.writer.add_scalar('loss', loss, global_step=n_iter)
                     self.writer.add_scalar('acc/top1', top1[0], global_step=n_iter)
                     self.writer.add_scalar('acc/top5', top5[0], global_step=n_iter)
-                    self.writer.add_scalar('learning_rate', self.scheduler.get_lr()[0], global_step=n_iter)
+                    self.writer.add_scalar('learning_rate', learning_rate, global_step=n_iter)
+                    print(f'loss: {loss} '
+                          f'acc/top1: {top1[0]} '
+                          f'acc/top5: {top5[0]} '
+                          f'learning_rate: {learning_rate}\n')
 
                 n_iter += 1
 
