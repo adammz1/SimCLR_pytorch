@@ -90,7 +90,8 @@ class SimCLR(object):
                     self.writer.add_scalar('acc/top1', top1[0], global_step=n_iter)
                     self.writer.add_scalar('acc/top5', top5[0], global_step=n_iter)
                     self.writer.add_scalar('learning_rate', learning_rate, global_step=n_iter)
-                    print(f'loss: {loss} '
+                    print(f'epoch: {epoch_counter} '
+                          f'loss: {loss} '
                           f'acc/top1: {top1[0]} '
                           f'acc/top5: {top5[0]} '
                           f'learning_rate: {learning_rate}\n')

@@ -33,3 +33,11 @@ def accuracy(output, target, topk=(1,)):
             correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
+
+def update_weights(base_model, new_model, str_to_replace, replacement_str):
+    base_model = {key.replace(str_to_replace, replacement_str): value for key, value in base_model.items()}
+    for name, param in base_model.items():
+        if name in new_model.state_dict():
+            new_model.state_dict()[name].copy_(param)
+    return new_model
+
