@@ -4,6 +4,7 @@ import torch.backends.cudnn as cudnn
 from torchvision import models
 from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset
 from models.resnet_simclr import ResNetSimCLR
+from models.feature_extractor import PatchifyBackBone, load
 from simclr import SimCLR
 from utils import update_weights
 
@@ -52,6 +53,7 @@ parser.add_argument('--n-views', default=2, type=int, metavar='N',
                     help='Number of views for contrastive learning training.')
 parser.add_argument('--gpu-index', default=0, type=int, help='Gpu index.')
 parser.add_argument('--checkpoint', default='', type=str, help="path to checkpoint")
+parser.add_argument('--model_mode', default=1, type=int, help="1- default 2- patchify")
 
 
 def main():
@@ -74,7 +76,13 @@ def main():
         train_dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True, drop_last=True)
 
-    model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+    if args.model_mode == 1:
+        model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+    elif args.model_mode == 2:
+        backbone = load('resnet18', pretrained=False)
+        model = PatchifyBackBone(backbone=backbone,
+                                 layers_to_extract_from=['layer3'], device=torch.device('cuda'))
+    # Load pretrained weights
     if len(args.checkpoint):
         weights = torch.load(args.checkpoint)['state_dict']
         model = update_weights(weights, model, 'backbone.', '')

@@ -23,9 +23,9 @@ class SimCLR(object):
         logging.basicConfig(filename=os.path.join(self.writer.log_dir, 'training.log'), level=logging.DEBUG)
         self.criterion = torch.nn.CrossEntropyLoss().to(self.args.device)
 
-    def info_nce_loss(self, features):
+    def info_nce_loss(self, features, multiplier):
 
-        labels = torch.cat([torch.arange(self.args.batch_size) for i in range(self.args.n_views)], dim=0)
+        labels = torch.cat([torch.arange(self.args.batch_size * multiplier) for i in range(self.args.n_views)], dim=0)
         labels = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()
         labels = labels.to(self.args.device)
 
@@ -73,7 +73,7 @@ class SimCLR(object):
 
                 with autocast(enabled=self.args.fp16_precision):
                     features = self.model(images)
-                    logits, labels = self.info_nce_loss(features)
+                    logits, labels = self.info_nce_loss(features, multiplier=1 if self.args.model_mode == 1 else 49)
                     loss = self.criterion(logits, labels)
 
                 self.optimizer.zero_grad()
